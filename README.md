@@ -22,17 +22,19 @@
 隐式后缀树，由于字符串S结尾不是唯一的字符$，某些后缀成为了其他后缀的前缀，这样这些后缀没有显式地体现在后缀树中，而是被某条其他后缀的边包含。如下图
 
 2.  High Level Ukkonen’s algorithmfor construct suffix tree withO(m) part部分介绍的算法还是O(m^3)，后面会不断简化， naïve algorithm need O(m^2）
+```
+Construct tree T1
+For i from 1 to m-1 do
+begin {phase i+1}
+          For j from 1 to i+1
+                    begin {extension j}
+                    Find the end of the path from the root labelled S[j..i] in the current tree.
+                    Extend that path by adding character S[i+l] if it is not there already
+          end;
+end;
 
-        Construct tree T1
-    For i from 1 to m-1 <span class="hljs-operator"><span class="hljs-keyword">do</span>
-    <span class="hljs-keyword">begin</span> {phase i+<span class="hljs-number">1</span>}
-        <span class="hljs-keyword">For</span> j <span class="hljs-keyword">from</span> <span class="hljs-number">1</span> <span class="hljs-keyword">to</span> i+<span class="hljs-number">1</span>
-        <span class="hljs-keyword">begin</span> {extension j}
-            Find the <span class="hljs-keyword">end</span> <span class="hljs-keyword">of</span> the path <span class="hljs-keyword">from</span> the root labelled S[j..i] <span class="hljs-keyword">in</span> the <span class="hljs-keyword">current</span> tree.
-            Extend that path <span class="hljs-keyword">by</span> adding <span class="hljs-built_in">character</span> S[i+l] <span class="hljs-keyword">if</span> it <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> there already
-         <span class="hljs-keyword">end</span>;</span>
-    <span class="hljs-operator"><span class="hljs-keyword">end</span>;</span>
 
+```
 Suffix extension is all about adding the next character into the suffix tree built so far.
 In extension j of phase i+1, algorithm finds the end of S[j..i] (which is already in the tree due to previous phase i) and then it extends S[j..i] to be sure the suffix S[j..i+1] is in the tree.
 
@@ -101,7 +103,7 @@ The idea is that, at any time, the closest internal node from the point, where w
 举例进行了字符串”abcabxabcd”后缀树的构建。
 构建过程中（part5中）我发现，suffix link的建立原则是，每个phase的最后一个新建的internal node指向root，而每个phase过程中构建的node会指向其后（同一个phase中的next extension）构建的internal node。如下图
 
-![fig](\fig40.png)
+![fig](fig40.png)
 
 图中node A B应该是phase 6构建的，suffix link是A-&gt;B, B-&gt;root，而phase 10中构建了C D E三个点，所以suffix link: C-&gt;D, D-&gt;E, E-&gt;root。上图中蓝色部分是part5中一段话，与我理解无太大偏差，但强调了一下实现过程中每次新建节点直接指向root的小技巧。
 
