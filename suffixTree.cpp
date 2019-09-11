@@ -2,6 +2,8 @@
 #include <stdio.h> 
 #include <string.h> 
 #include <stdlib.h> 
+#include <iostream>
+using namespace std;
 #define MAX_CHAR 256 
 
 struct SuffixTreeNode {
@@ -119,11 +121,14 @@ void extendSuffixTree(int pos)
 			activeEdge = pos; //APCFALZ 
 
 		// There is no outgoing edge starting with 
-		// activeEdge from activeNode 
-		if (activeNode->children] == NULL)
+		// activeEdge from activeNode
+
+		//printf("zzz int(text[activeEdge]) %i %c \n", int(text[activeEdge]), text[activeEdge]);
+
+		if (activeNode->children[int(text[activeEdge])] == NULL)
 		{
 			//Extension Rule 2 (A new leaf edge gets created) 
-			activeNode->children] =
+			activeNode->children[int(text[activeEdge])] =
 				newNode(pos, &leafEnd);
 
 			/*A new leaf edge is created in above line starting
@@ -133,7 +138,7 @@ void extendSuffixTree(int pos)
 			internal node to current activeNode. Then set lastNewNode
 			to NULL indicating no more node waiting for suffix link
 			reset.*/
-			if (lastNewNode != NULL)
+			if (lastNewNode != NULL)           //zzz 我觉得这段没用
 			{
 				lastNewNode->suffixLink = activeNode;
 				lastNewNode = NULL;
@@ -145,15 +150,20 @@ void extendSuffixTree(int pos)
 		{
 			// Get the next node at the end of edge starting 
 			// with activeEdge 
-			Node *next = activeNode->children];
-			if (walkDown(next))//Do walkdown 
+			Node *next = activeNode->children[int(text[activeEdge])];
+			if (walkDown(next))//Do walkdown     //zzz 如果wd了，返回值为1，就会continue，
+				//再走一遍循环（因为remainingSuffixCount值没减少，
+				//所以不会漏掉一个extension）
 			{
 				//Start from next node (the new activeNode) 
 				continue;
 			}
 			/*Extension Rule 3 (current character being processed
 			is already on the edge)*/
-			if (text[next->start + activeLength] == text[pos])
+			if (text[next->start + activeLength] == text[pos])   //zzz 这里next应该是activeNode吧?
+																 //zzz 这里就应该是next，注意上面if循环中有个continue
+																 //一旦walkdown会更新activeNode然后重走循环会更新next
+																 //为新的activeNode的child
 			{
 				//If a newly created node waiting for it's 
 				//suffix link to be set, then set suffix link 
@@ -183,12 +193,12 @@ void extendSuffixTree(int pos)
 
 			//New internal node 
 			Node *split = newNode(next->start, splitEnd);
-			activeNode->children] = split;
+			activeNode->children[int(text[activeEdge])] = split;
 
 			//New leaf coming out of new internal node 
-			split->children] = newNode(pos, &leafEnd);
+			split->children[int(text[pos])] = newNode(pos, &leafEnd);  //zzz 不确定
 			next->start += activeLength;
-			split->children] = next;
+			split->children[int(text[next->start])] = next;    //zzz   不确定
 
 			/*We got a new internal node here. If there is any
 			internal node created in last extensions of same
@@ -237,13 +247,14 @@ void print(int i, int j)
 //Print the suffix tree as well along with setting suffix index 
 //So tree will be printed in DFS manner 
 //Each edge along with it's suffix index will be printed 
-void setSuffixIndexByDFS(Node *n, int labelHeight)
+void setSuffixIndexByDFS(Node *n, int labelHeight , string attach)
 {
 	if (n == NULL) return;
 
 	if (n->start != -1) //A non-root node 
 	{
 		//Print the label on edge from parent to current node 
+		cout << attach.c_str();
 		print(n->start, *(n->end));
 	}
 	int leaf = 1;
@@ -253,13 +264,13 @@ void setSuffixIndexByDFS(Node *n, int labelHeight)
 		if (n->children[i] != NULL)
 		{
 			if (leaf == 1 && n->start != -1)
-				printf(" [%d]\n", n->suffixIndex);
+				printf("[%d]\n", n->suffixIndex);
 
 			//Current node is not a leaf as it has outgoing 
 			//edges from it. 
 			leaf = 0;
 			setSuffixIndexByDFS(n->children[i], labelHeight +
-				edgeLength(n->children[i]));
+				edgeLength(n->children[i]), string(attach+"---"));
 		}
 	}
 	if (leaf == 1)
@@ -301,10 +312,14 @@ void buildSuffixTree()
 	root = newNode(-1, rootEnd);
 
 	activeNode = root; //First activeNode will be root 
-	for (i = 0; i<size; i++)
+	for (i = 0; i < size; i++){
 		extendSuffixTree(i);
+		printf("\n ---------------------\n phase %d \n", i);
+		int labelHeight = 0;
+		setSuffixIndexByDFS(root, labelHeight, "");
+	}
 	int labelHeight = 0;
-	setSuffixIndexByDFS(root, labelHeight);
+	//setSuffixIndexByDFS(root, labelHeight);
 
 	//Free the dynamically allocated memory 
 	freeSuffixTreeByPostOrder(root);
@@ -317,9 +332,10 @@ int main(int argc, char *argv[])
 	// strcpy(text, "xabxac#"); buildSuffixTree(); 
 	// strcpy(text, "xabxa"); buildSuffixTree(); 
 	// strcpy(text, "xabxa$"); buildSuffixTree(); 
-	strcpy(text, "abcabxabcd$"); buildSuffixTree();
+	strcpy_s(text, "abcabxabcd$"); buildSuffixTree();
 	// strcpy(text, "geeksforgeeks$"); buildSuffixTree(); 
 	// strcpy(text, "THIS IS A TEST TEXT$"); buildSuffixTree(); 
 	// strcpy(text, "AABAACAADAABAAABAA$"); buildSuffixTree(); 
+	system("pause");
 	return 0;
 }
