@@ -102,7 +102,7 @@ The idea is that, at any time, the closest internal node from the point, where w
 举例进行了字符串”abcabxabcd”后缀树的构建。
 构建过程中（part5中）我发现，suffix link的建立原则是，每个phase的最后一个新建的internal node指向root，而每个phase过程中构建的node会指向其后（同一个phase中的next extension）构建的internal node。如下图
 
-![fig](fig22ng)
+![fig](fig2.png)
 
 图中node A B应该是phase 6构建的，suffix link是A-&gt;B, B-&gt;root，而phase 10中构建了C D E三个点，所以suffix link: C-&gt;D, D-&gt;E, E-&gt;root。上图中蓝色部分是part5中一段话，与我理解无太大偏差，但强调了一下实现过程中每次新建节点直接指向root的小技巧。
 
@@ -114,3 +114,4 @@ We see following facts in Phase 10:
 *   Due to above fact, in any extension, when current activeNode is derived via suffix link from previous extension’s activeNode, then exactly same extension logic apply in current extension as previous extension. (In Phase 10, same extension logic is applied in extensions 7, 8 and 9)
 *   If a new internal node gets created in extension j of any phase i, then this newly created internal node will get it’s suffix link set by the end of next extension j+1 of same phase i. e.g. node C got created in extension 7 of phase 10 (Figure 37) and it got it’s suffix link set to node D in extension 8 of same phase 10 (Figure 38). Similarly node D got created in extension 8 of phase 10 (Figure 38) and it got its suffix link set to node E in extension 9 of same phase 10 (Figure 39). Similarly node E got created in extension 9 of phase 10 (Figure 39) and it got its suffix link set to root in extension 10 of same phase 10 (Figure 40).
 *   Based on above fact, every internal node will have a suffix link to some other internal node or root. Root is not an internal node and it will not have suffix link.
+
